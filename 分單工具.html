@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>吉伊卡哇 & 滿額禮智慧湊單分單助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ck: {
+              bgYellow: '#FFFCEB',     // 官網淡黃色背景
+              pinkBase: '#FFB5CC',     // 官網基礎粉紅
+              pinkDark: '#F48EAA',     // 按鈕與重點字粉紅
+              pinkLight: '#FFEBF1',    // 極淺粉紅(區塊底色)
+              blue: '#A3D2F7',         // 小八藍
+              yellowDark: '#FAD85D',   // 烏薩奇黃
+              text: '#7A6B6B'          // 柔和的咖啡色文字
+            }
+          },
+          fontFamily: {
+            'rounded': ['"M PLUS Rounded 1c"', '"Noto Sans TC"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'M PLUS Rounded 1c', 'Noto Sans TC', sans-serif;
+      background-color: #FFFCEB; /* ck-bgYellow */
+      color: #7A6B6B;
+      overflow-x: hidden;
+    }
+    
+    /* 隱藏數字輸入框的上下箭頭 */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    
+    /* 可愛風格的捲軸 */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #FFB5CC;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #FFEBF1;
+      border-radius: 9999px;
+    }
+
+    /* 頂部粉紅大圓弧背景 */
+    .hero-curved-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 400px;
+      background-color: #FFB5CC;
+      border-bottom-left-radius: 50% 25%;
+      border-bottom-right-radius: 50% 25%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    /* 星星與小圖案裝飾特效 */
+    .star-decoration {
+      position: absolute;
+      color: rgba(255, 255, 255, 0.85);
+      animation: float-twinkle 3s ease-in-out infinite alternate;
+    }
+    .star-pink { color: rgba(244, 142, 170, 0.4); }
+    
+    @keyframes float-twinkle {
+      0% { transform: translateY(0px) scale(0.9) rotate(0deg); opacity: 0.6; }
+      100% { transform: translateY(-8px) scale(1.1) rotate(15deg); opacity: 1; }
+    }
+
+    /* 可愛卡片浮雕效果 */
+    .ck-card {
+      background: white;
+      border-radius: 32px;
+      border: 3px solid #FFEBF1;
+      box-shadow: 0 10px 30px rgba(255, 181, 204, 0.15);
+      position: relative;
+    }
+
+    /* 柔和圓潤的輸入框 */
+    .ck-input {
+      width: 100%;
+      border-radius: 9999px;
+      border: 2px solid #FFEBF1;
+      background-color: #FFF;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.875rem;
+      color: #7A6B6B;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+    .ck-input:focus {
+      outline: none;
+      border-color: #FFB5CC;
+      box-shadow: 0 0 0 4px rgba(255, 181, 204, 0.3);
+      transform: scale(1.02);
+    }
+    .ck-input[readonly] {
+      background-color: #F8F9FA;
+      border-color: #E9ECEF;
+      color: #ADB5BD;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 主按鈕 (粉紅漸層) */
+    .ck-btn-primary {
+      background: linear-gradient(135deg, #F48EAA 0%, #FFB5CC 100%);
+      color: white;
+      border-radius: 9999px;
+      font-weight: 800;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 20px rgba(244, 142, 170, 0.4);
+    }
+    .ck-btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 12px 25px rgba(244, 142, 170, 0.5);
+    }
+    .ck-btn-primary:active {
+      transform: translateY(1px) scale(0.98);
+    }
+    
+    /* 標籤設計 */
+    .ck-badge {
+      background-color: white;
+      border: 2px solid #F48EAA;
+      color: #F48EAA;
+      border-radius: 9999px;
+      padding: 2px 10px;
+      font-size: 10px;
+      font-weight: 900;
+    }
+  </style>
+</head>
+<body class="min-h-screen relative font-rounded">
+
+  <div class="hero-curved-bg">
+    <!-- 隨機散落的星星 -->
+    <i class="fa-solid fa-star star-decoration text-2xl" style="top: 15%; left: 10%; animation-delay: 0s;"></i>
+    <i class="fa-solid fa-star star-decoration text-sm" style="top: 25%; left: 20%; animation-delay: 1.5s;"></i>
+    <i class="fa-solid fa-sparkles star-decoration text-3xl" style="top: 12%; left: 80%; animation-delay: 0.5s;"></i>
+    <i class="fa-solid fa-star star-decoration text-lg" style="top: 40%; left: 88%; animation-delay: 2s;"></i>
+    <i class="fa-solid fa-star star-decoration text-xs" style="top: 30%; left: 50%; animation-delay: 1s;"></i>
+    <i class="fa-solid fa-heart star-decoration text-xl opacity-50" style="top: 60%; left: 15%; animation-delay: 0.7s;"></i>
+  </div>
+  
+  <i class="fa-regular fa-star star-decoration star-pink text-2xl" style="top: 500px; left: 5%; animation-delay: 0.2s;"></i>
+  <i class="fa-regular fa-star star-decoration star-pink text-xl" style="top: 700px; right: 8%; animation-delay: 1.2s;"></i>
+  <i class="fa-solid fa-sparkles star-decoration star-pink text-lg" style="top: 850px; left: 12%; animation-delay: 0.8s;"></i>
+  <!-- 頂部備註：各店家運費與免運門檻 -->
+  <div class="relative z-10 max-w-4xl mx-auto px-4 pt-6">
+    <div class="bg-white/95 rounded-3xl border-4 border-ck-pinkLight shadow-[0_8px_20px_rgba(244,142,170,0.25)] px-5 py-4">
+      <div class="flex items-center gap-2 mb-2 text-ck-pinkDark font-black text-sm">
+        <i class="fa-solid fa-note-sticky"></i> 備註：各店家運費與免運門檻
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-black text-ck-text">
+        <div class="bg-ck-pinkLight/60 rounded-2xl px-4 py-2.5 leading-relaxed">
+          <div class="text-ck-pinkDark mb-0.5">吉伊卡哇官網</div>
+          運費 ¥1,045／免運門檻 ¥11,000
+        </div>
+        <div class="bg-ck-bgYellow rounded-2xl px-4 py-2.5 leading-relaxed border-2 border-ck-yellowDark/30">
+          <div class="text-ck-yellowDark mb-0.5">J-Meeshop</div>
+          運費 US$14.68／免運門檻 US$36.4
+        </div>
+      </div>
+    </div>
+  </div>
+  <header class="pt-10 pb-16 relative z-10 text-center">
+    <div class="flex items-center justify-center gap-4 mb-3">
+      <div class="w-14 h-14 rounded-full bg-white text-ck-pinkDark flex items-center justify-center shadow-[0_4px_15px_rgba(255,255,255,0.8)] text-2xl border-4 border-[#FFFCEB]">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </div>
+      <h1 class="text-4xl font-black text-white tracking-wider drop-shadow-md" style="text-shadow: 2px 2px 0px #F48EAA;">
+        Chiikawa 分單小精靈
+      </h1>
+    </div>
+    <p class="text-white text-sm font-bold tracking-widest drop-shadow" style="text-shadow: 1px 1px 0px #F48EAA;">智慧限購拆車 × 湊免運預判 × 滿額禮最佳化</p>
+
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pb-20 grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+    
+    <!-- 左側：設定與輸入 (5 cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      
+      <!-- 設定卡片：幣別與門檻 -->
+      <section class="ck-card p-6 space-y-4">
+        <div class="flex items-center gap-2 pb-2">
+          <i class="fa-solid fa-coins text-ck-yellowDark text-xl bg-ck-bgYellow w-8 h-8 rounded-full flex items-center justify-center"></i>
+          <h2 class="font-black text-ck-text text-lg tracking-wide">幣別與免運設定</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-black text-ck-text mb-1.5 ml-2">幣別選擇</label>
+            <div class="relative">
+              <select id="currencySelect" class="ck-input cursor-pointer appearance-none">
+                <option value="JPY" data-symbol="¥" data-rate="0.2061">日幣 (JPY, ¥)</option>
+                <option value="KRW" data-symbol="₩" data-rate="0.0250">韓元 (KRW, ₩)</option>
+                <option value="USD" data-symbol="$" data-rate="32.15">美金 (USD, $)</option>
+                <option value="THB" data-symbol="฿" data-rate="0.9720">泰幣 (THB, ฿)</option>
+                <option value="TWD" data-symbol="NT$" data-rate="1.0000">台幣 (TWD, NT$)</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-4 top-3 text-ck-pinkBase pointer-events-none"></i>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-black text-ck-text mb-1.5 ml-2">台幣參考匯率 (1外幣=)</label>
+            <div class="relative">
+              <input type="number" id="exchangeRate" step="any" value="0.2061" class="ck-input">
+              <span class="absolute right-4 top-2 text-xs text-ck-pinkBase mt-0.5 font-black">NT$</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-black text-ck-text mb-1.5 ml-2">免運門檻 (<span class="currency-symbol">¥</span>)</label>
+            <input type="number" id="freeShippingThreshold" value="11000" min="0" step="any" class="ck-input">
+            <div class="text-center mt-1"><span id="thresholdTwd" class="text-[11px] bg-ck-pinkLight text-ck-pinkDark px-2 py-0.5 rounded-full font-black">約 NT$ 2,267</span></div>
+          </div>
+          <div>
+            <label class="block text-xs font-black text-ck-text mb-1.5 ml-2">未達門檻運費 (<span class="currency-symbol">¥</span>)</label>
+            <input type="number" id="shippingFee" value="1045" min="0" step="any" class="ck-input">
+            <div class="text-center mt-1"><span id="shippingFeeTwd" class="text-[11px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-black">約 NT$ 181</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 設定卡片：滿額禮規則 -->
+      <section class="ck-card p-6 space-y-4">
+        <div class="flex items-center justify-between pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gift text-ck-pinkDark text-xl bg-ck-pinkLight w-8 h-8 rounded-full flex items-center justify-center"></i>
+            <h2 class="font-black text-ck-text text-lg tracking-wide">滿額禮規則 (可選)</h2>
+          </div>
+          <button id="btnAddGiftRule" class="text-xs bg-ck-pinkLight text-ck-pinkDark hover:bg-ck-pinkBase hover:text-white px-3 py-1.5 rounded-full font-black transition flex items-center gap-1 shadow-sm">
+            <i class="fa-solid fa-plus"></i> 新增
+          </button>
+        </div>
+
+        <div id="giftRulesList" class="space-y-2">
+          <!-- Dynamic Gift Rules -->
+        </div>
+
+        <div class="pt-4 border-t-2 border-dashed border-ck-pinkLight mt-2">
+          <label class="block text-xs font-black text-ck-text mb-2 ml-2">分單優先策略</label>
+          <div class="flex gap-3 text-sm">
+            <label class="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl border-2 border-ck-pinkLight cursor-pointer hover:bg-ck-pinkLight transition has-[:checked]:bg-ck-pinkLight has-[:checked]:border-ck-pinkDark has-[:checked]:text-ck-pinkDark font-black text-gray-400">
+              <input type="radio" name="splitStrategy" value="freeShipping" checked class="hidden">
+              <i class="fa-solid fa-truck-fast"></i> 免運優先 (預判集中)
+            </label>
+            <label class="flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl border-2 border-ck-pinkLight cursor-pointer hover:bg-ck-pinkLight transition has-[:checked]:bg-ck-pinkLight has-[:checked]:border-ck-pinkDark has-[:checked]:text-ck-pinkDark font-black text-gray-400">
+              <input type="radio" name="splitStrategy" value="maximizeGifts" class="hidden">
+              <i class="fa-solid fa-boxes-packing"></i> 贈品最大化
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片：新增購買清單 -->
+      <section class="ck-card p-6 space-y-4 border-4 border-[#FFB5CC]">
+        <div class="flex items-center justify-between pb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cart-arrow-down text-white text-lg bg-ck-blue w-8 h-8 rounded-full flex items-center justify-center shadow-sm"></i>
+            <h2 class="font-black text-ck-text text-lg tracking-wide">登記購買品項</h2>
+          </div>
+          <div class="flex gap-2">
+            <button id="btnOpenBatchModal" class="px-4 py-1.5 rounded-full bg-ck-bgYellow text-ck-yellowDark border-2 border-ck-yellowDark text-xs font-black hover:bg-ck-yellowDark hover:text-white transition flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-paste"></i> 批次輸入
+            </button>
+            <button id="btnClearAllItems" class="px-3 py-1.5 rounded-full bg-red-50 hover:bg-red-500 text-red-400 hover:text-white border-2 border-red-100 flex items-center justify-center gap-1 transition shadow-sm text-xs font-black">
+              <i class="fa-solid fa-trash-can"></i> 清空
+            </button>
+          </div>
+        </div>
+
+        <form id="itemForm" class="space-y-4 bg-gray-50 p-4 rounded-3xl border-2 border-gray-100">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <div class="flex items-center justify-between mb-1.5 ml-2">
+                <label class="text-xs font-black text-ck-text">購買人</label>
+                <span class="text-[10px] bg-ck-blue/20 text-blue-700 px-2 py-0.5 rounded-full font-black">支援 小明*2/小王</span>
+              </div>
+              <input type="text" id="inputBuyer" required placeholder="如: 阿罵/管妹" class="ck-input bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-black text-ck-text mb-1.5 ml-2">商品名稱 (同名自動併車)</label>
+              <input type="text" id="inputItemName" required placeholder="如: 兔子幽靈娃" class="ck-input bg-white">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[11px] font-black text-ck-text mb-1.5 ml-2">單價 (<span class="currency-symbol">¥</span>)</label>
+              <input type="number" id="inputPrice" min="0" step="any" required placeholder="0" class="ck-input bg-white font-mono text-center">
+            </div>
+            <div>
+              <label class="block text-[11px] font-black text-ck-text mb-1.5 ml-2 text-center">數量</label>
+              <input type="number" id="inputQty" min="1" step="1" placeholder="自動算" class="ck-input bg-white text-center">
+            </div>
+            <div>
+              <div class="flex items-center justify-center mb-1.5">
+                <label class="text-[11px] font-black text-ck-text">單車限購</label>
+              </div>
+              <div class="relative">
+                <input type="number" id="inputLimit" min="0" step="1" value="0" class="ck-input bg-white text-ck-pinkDark text-center pl-8">
+                <span class="absolute left-3 top-2.5 text-[10px] text-gray-400 font-black">0=不限</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between pt-2">
+            <div class="text-sm font-black text-ck-text pl-2">
+              小計：<span id="previewSubtotal" class="text-ck-pinkDark font-mono text-xl ml-1">¥0</span>
+            </div>
+            <button type="submit" class="ck-btn-primary px-6 py-2.5 flex items-center gap-2">
+              <i class="fa-solid fa-plus-circle text-lg"></i> 加入購物車
+            </button>
+          </div>
+        </form>
+
+        <!-- 登記清單列表區 -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-3 px-2">
+            <span class="text-sm font-black text-ck-text flex items-center gap-1.5">
+              <i class="fa-solid fa-list-ul text-ck-pinkBase"></i>
+              已登記清單 (<span id="itemsCount" class="text-ck-pinkDark">0</span> 筆 / 共 <span id="totalUnits">0</span> 件)
+            </span>
+            <span class="text-[11px] font-black text-white bg-ck-text px-3 py-1 rounded-full shadow-inner">
+              總額: <span id="totalItemsAmount" class="font-mono text-sm">¥0</span>
+            </span>
+          </div>
+          
+          <div id="itemsContainer" class="space-y-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 pb-2">
+            <!-- 項目清單動態生成 -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 執行最佳化按鈕 -->
+      <button id="btnOptimize" class="w-full py-5 rounded-full bg-ck-pinkDark text-white font-black text-xl shadow-[0_8px_0_#D86C8F] hover:translate-y-1 hover:shadow-[0_4px_0_#D86C8F] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-3 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+        <i class="fa-solid fa-wand-magic-sparkles text-ck-yellowDark text-2xl animate-pulse"></i> 
+        <span>拜託了！幫我智慧拆單分車</span>
+      </button>
+
+    </div>
+
+    <!-- 右側：結果與分單報表 (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      
+      <!-- 統計摘要卡片 -->
+      <div id="summaryCards" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="ck-card p-5 text-center flex flex-col justify-center items-center">
+          <div class="w-10 h-10 bg-ck-bgYellow rounded-full flex items-center justify-center text-ck-yellowDark mb-2 border-2 border-ck-yellowDark">
+            <i class="fa-solid fa-boxes-stacked text-lg"></i>
+          </div>
+          <div class="text-[11px] text-gray-500 font-black">總需車數</div>
+          <div id="metricTotalCarts" class="text-3xl font-black text-ck-text mt-1">-</div>
+        </div>
+        <div class="ck-card p-5 text-center flex flex-col justify-center items-center">
+          <div class="w-10 h-10 bg-[#e6f4ea] rounded-full flex items-center justify-center text-green-500 mb-2 border-2 border-green-300">
+            <i class="fa-solid fa-truck-fast text-lg"></i>
+          </div>
+          <div class="text-[11px] text-gray-500 font-black">免運達成車數</div>
+          <div id="metricFreeShippingCarts" class="text-3xl font-black text-green-600 mt-1">-</div>
+        </div>
+        <div class="ck-card p-5 text-center flex flex-col justify-center items-center">
+          <div class="w-10 h-10 bg-ck-pinkLight rounded-full flex items-center justify-center text-ck-pinkDark mb-2 border-2 border-ck-pinkBase">
+            <i class="fa-solid fa-gift text-lg"></i>
+          </div>
+          <div class="text-[11px] text-gray-500 font-black">總贈品數</div>
+          <div id="metricTotalGifts" class="text-3xl font-black text-ck-pinkDark mt-1">-</div>
+        </div>
+        <div class="ck-card p-5 text-center flex flex-col justify-center items-center">
+          <div class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 mb-2 border-2 border-gray-200">
+            <i class="fa-solid fa-coins text-lg"></i>
+          </div>
+          <div class="text-[11px] text-gray-500 font-black">總運費支出</div>
+          <div id="metricTotalShipping" class="text-xl font-black text-gray-600 mt-2 font-mono">-</div>
+        </div>
+      </div>
+
+      <!-- 複製通告列 -->
+      <div class="ck-card p-3 pl-6 pr-3 flex flex-wrap items-center justify-between bg-white border-4 border-ck-blue/40 shadow-[0_4px_15px_rgba(163,210,247,0.3)]">
+        <div class="text-sm font-black text-ck-text flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-ck-blue text-white flex items-center justify-center"><i class="fa-solid fa-bullhorn text-sm"></i></div>
+          <span>分單報表已就緒！</span>
+        </div>
+        <button id="btnCopyReport" class="px-6 py-3 rounded-full bg-ck-blue text-white text-sm font-black shadow-md hover:bg-[#8ebddd] hover:-translate-y-1 transition flex items-center gap-2 border-b-4 border-[#8ebddd] active:border-b-0 active:translate-y-0">
+          <i class="fa-regular fa-copy"></i> 複製發文格式
+        </button>
+      </div>
+
+      <!-- 分車結果容器 -->
+      <div id="cartsContainer" class="space-y-5">
+        <div class="ck-card p-16 text-center border-dashed border-4 border-ck-pinkLight bg-white">
+          <div class="w-24 h-24 rounded-full bg-ck-bgYellow text-ck-pinkBase flex items-center justify-center mx-auto text-5xl mb-6 shadow-inner border-4 border-white">
+            <i class="fa-solid fa-ghost animate-bounce"></i>
+          </div>
+          <h3 class="font-black text-ck-text text-xl">空空如也，還沒開始分單喔！</h3>
+          <p class="text-sm text-gray-400 mt-3 max-w-sm mx-auto font-bold leading-relaxed">
+            在左側設定門檻並登記商品，點擊「拜託了！幫我智慧拆單」魔法按鈕。
+          </p>
+        </div>
+      </div>
+
+      <!-- 各團員帳目分攤 (包含運費平攤) -->
+      <section id="buyersSection" class="ck-card p-6 space-y-4 hidden border-t-8 border-ck-yellowDark">
+        <div class="flex items-center justify-between pb-2 border-b-2 border-gray-100">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-ck-yellowDark text-white flex items-center justify-center"><i class="fa-solid fa-users text-sm"></i></div>
+            <h2 class="font-black text-ck-text text-lg">團員帳目分攤 (含運費平攤)</h2>
+          </div>
+          <span class="text-[10px] font-black text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">依購買件數平攤運費</span>
+        </div>
+
+        <div id="buyersTable" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Buyer cards rendered dynamically -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 批次匯入 Modal -->
+  <div id="batchModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="ck-card max-w-lg w-full p-8 shadow-2xl relative">
+      <div class="absolute -top-4 -right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-ck-pinkLight cursor-pointer hover:bg-gray-50 text-gray-400 transition transform hover:scale-110" id="btnCloseBatchModal">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </div>
+      
+      <div class="flex items-center gap-2 border-b-2 border-gray-100 pb-3 mb-5">
+        <div class="w-8 h-8 rounded-full bg-ck-blue text-white flex items-center justify-center"><i class="fa-solid fa-paste"></i></div>
+        <h3 class="font-black text-ck-text text-xl">批次輸入商品清單</h3>
+      </div>
+
+      <div class="text-xs font-black text-gray-500 space-y-2 mb-5 bg-ck-bgYellow p-4 rounded-2xl border-2 border-ck-yellowDark/30 leading-relaxed">
+        <p>請將登記明細貼在下方，每行一筆，欄位以空白或 Tab 分隔：</p>
+        <p class="font-mono bg-white p-3 rounded-xl text-gray-600 border border-gray-100 shadow-sm mt-2">
+          格式：<span class="text-ck-pinkDark">購買人</span>(支援小明*2) <span class="text-ck-blue">商品名稱</span> 單價 總數量 限購<br>
+          範例：<span class="text-ck-pinkDark">管妹*2/阿喬</span> <span class="text-ck-blue">兔子幽靈娃</span> 1540 3 1<br>
+          範例：<span class="text-ck-pinkDark">阿罵</span> <span class="text-ck-blue">南瓜兔子</span> 2420 1 1
+        </p>
+      </div>
+
+      <textarea id="batchInputText" rows="6" placeholder="請貼上內容..." class="w-full rounded-3xl border-4 border-ck-pinkLight p-4 text-sm font-mono focus:border-ck-pinkBase focus:outline-none shadow-inner"></textarea>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="btnCancelBatch" class="px-6 py-2.5 text-sm font-black rounded-full border-2 border-gray-200 hover:bg-gray-100 text-gray-500 transition">取消</button>
+        <button id="btnConfirmBatch" class="px-8 py-2.5 text-sm font-black rounded-full bg-ck-blue text-white hover:bg-[#8ebddd] shadow-[0_4px_10px_rgba(163,210,247,0.5)] transition hover:-translate-y-1 border-b-4 border-[#8ebddd] active:border-b-0 active:translate-y-0">匯入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改品項 Modal -->
+  <div id="editModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="ck-card max-w-md w-full p-8 shadow-2xl relative border-4 border-ck-pinkBase">
+      <div class="absolute -top-4 -right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-ck-pinkLight cursor-pointer hover:bg-gray-50 text-gray-400 transition transform hover:scale-110" id="btnCloseEditModal">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </div>
+      
+      <div class="flex items-center gap-2 border-b-2 border-ck-pinkLight pb-3 mb-5">
+        <div class="w-8 h-8 rounded-full bg-ck-pinkDark text-white flex items-center justify-center"><i class="fa-solid fa-pen-nib"></i></div>
+        <h3 class="font-black text-ck-text text-xl">修改商品明細</h3>
+      </div>
+
+      <form id="editItemForm" class="space-y-5">
+        <input type="hidden" id="editItemId">
+        <div>
+          <label class="block text-xs font-black text-ck-text mb-1.5 ml-2">購買人 (支援小明*2/小美)</label>
+          <input type="text" id="editBuyer" required class="ck-input border-2 border-gray-200">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1.5 ml-2">
+            <label class="block text-xs font-black text-ck-text">商品名稱</label>
+            <span class="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-black flex items-center gap-1 shadow-inner">
+              <i class="fa-solid fa-lock text-[9px]"></i> 名稱鎖定(限購比對用)
+            </span>
+          </div>
+          <!-- 鎖定輸入框外觀 -->
+          <input type="text" id="editItemName" readonly class="ck-input font-bold bg-gray-100 border-2 border-gray-200 text-gray-500 opacity-80 cursor-not-allowed">
+          <p class="text-[10px] text-ck-pinkDark mt-2 ml-2 font-black"><i class="fa-solid fa-lightbulb"></i> 若想換商品，請刪除此筆重新新增以確保分車正確。</p>
+        </div>
+        <div class="grid grid-cols-3 gap-3 bg-ck-bgYellow p-3 rounded-2xl border-2 border-ck-yellowDark/20">
+          <div>
+            <label class="block text-[11px] font-black text-ck-text mb-1.5 ml-1 text-center">單價</label>
+            <input type="number" id="editPrice" min="0" step="any" required class="ck-input px-2 text-center font-mono">
+          </div>
+          <div>
+            <label class="block text-[11px] font-black text-ck-text mb-1.5 ml-1 text-center">數量</label>
+            <input type="number" id="editQty" min="1" step="1" required class="ck-input px-2 text-center">
+          </div>
+          <div>
+            <label class="block text-[11px] font-black text-ck-text mb-1.5 ml-1 text-center">每單限購</label>
+            <input type="number" id="editLimit" min="0" step="1" required class="ck-input px-2 text-center text-ck-pinkDark">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6 pt-5 border-t-2 border-gray-100">
+          <button type="button" id="btnCancelEdit" class="px-6 py-2.5 text-sm font-black rounded-full border-2 border-gray-200 hover:bg-gray-100 text-gray-500 transition">取消</button>
+          <button type="submit" class="px-8 py-2.5 text-sm font-black rounded-full bg-ck-pinkDark text-white shadow-[0_4px_10px_rgba(244,142,170,0.4)] hover:bg-pink-500 transition hover:-translate-y-1 border-b-4 border-pink-600 active:border-b-0 active:translate-y-0">儲存並重算</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 確認清空 Modal -->
+  <div id="confirmClearModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="ck-card max-w-sm w-full p-6 text-center shadow-2xl relative border-4 border-red-100">
+      <div class="w-16 h-16 rounded-full bg-red-50 text-red-400 flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+      <h3 class="font-black text-ck-text text-xl mb-2">確定要清空嗎？</h3>
+      <p class="text-sm text-gray-500 mb-6 font-bold">清空後所有登記的商品資料將會消失喔！</p>
+      <div class="flex justify-center gap-3">
+        <button id="btnCancelClear" class="px-6 py-2.5 text-sm font-black rounded-full border-2 border-gray-200 hover:bg-gray-100 text-gray-500 transition">再想想</button>
+        <button id="btnConfirmClear" class="px-6 py-2.5 text-sm font-black rounded-full bg-red-400 text-white shadow-md hover:bg-red-500 transition hover:-translate-y-1 border-b-4 border-red-500 active:border-b-0 active:translate-y-0">確定清空</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 吐司通知 -->
+  <div id="toastContainer" class="fixed bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- 雲端進度儲存 (Firebase Initialization) ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'chiikawa-split-app';
+    const fbConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+    let fbApp, auth, db, userId;
+    let saveTimeout = null;
+    
+    try {
+      const firebaseConfig = JSON.parse(fbConfigStr);
+      if (Object.keys(firebaseConfig).length > 0) {
+        fbApp = initializeApp(firebaseConfig);
+        auth = getAuth(fbApp);
+        db = getFirestore(fbApp);
+      }
+    } catch (e) { console.warn("Firebase config error", e); }
+
+    function requestSave() {
+      if (!db || !userId) return;
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(async () => {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'users', userId, 'saves', 'latest');
+          await setDoc(docRef, {
+            currency: state.currency, currencySymbol: state.currencySymbol,
+            exchangeRate: state.exchangeRate, freeShippingThreshold: state.freeShippingThreshold,
+            shippingFee: state.shippingFee, giftRules: state.giftRules,
+            items: state.items, strategy: state.strategy
+          });
+        } catch (e) { console.warn("Save failed", e); }
+      }, 800);
+    }
+
+    /* Global Application State */
+    const state = {
+      currency: "JPY",
+      currencySymbol: "¥",
+      exchangeRate: 0.2061,
+      freeShippingThreshold: 11000,
+      shippingFee: 1045,
+      giftRules: [], // { id, threshold, name, isCumulative }
+      items: [], // { id, buyer, name, normName, price, qty, limit }
+      strategy: "freeShipping",
+      lastResults: null
+    };
+
+    /* Utility Functions */
+    function formatMoney(amount, decimals = null) {
+      if (decimals === null) {
+        decimals = (state.currency === "JPY" || state.currency === "KRW" || state.currency === "TWD") ? 0 : 2;
+      }
+      return Number(amount).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function toTwd(amount) {
+      const val = Math.round(Number(amount) * state.exchangeRate);
+      return Number.isNaN(val) ? 0 : val;
+    }
+
+    function formatTwd(amount) {
+      return "NT$" + formatMoney(toTwd(amount), 0);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      })[m]);
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      
+      let bg = "bg-gray-800";
+      let icon = "fa-circle-info";
+      if (type === "success") { bg = "bg-ck-pinkDark"; icon = "fa-check-circle"; }
+      else if (type === "warning") { bg = "bg-ck-yellowDark"; icon = "fa-triangle-exclamation text-gray-800"; }
+      
+      const textColor = type === "warning" ? "text-gray-900" : "text-white";
+
+      toast.className = `px-6 py-4 rounded-full shadow-2xl font-black flex items-center gap-3 transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto ${bg} ${textColor} border-2 border-white/20`;
+      toast.innerHTML = `<i class="fa-solid ${icon} text-xl"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => toast.classList.remove("translate-y-4", "opacity-0"));
+      setTimeout(() => {
+        toast.classList.add("translate-y-4", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      let successful = false;
+      try {
+        successful = document.execCommand('copy');
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+      
+      document.body.removeChild(textArea);
+      return successful;
+    }
+
+    function parseBuyersInput(buyerStr, explicitTotalQty = 0) {
+      if (!buyerStr) return [];
+      const parts = buyerStr.split(/[/,，、|]/).map(s => s.trim()).filter(Boolean);
+      let list = [];
+      parts.forEach(part => {
+        const match = part.match(/^(.+?)(?:[*xX](\d+))$/);
+        if (match) {
+          list.push({ buyer: match[1].trim(), qty: parseInt(match[2], 10) || 1 });
+        } else {
+          list.push({ buyer: part, qty: 1 });
+        }
+      });
+      if (explicitTotalQty > 0 && list.length === 1 && list[0].qty === 1) {
+        list[0].qty = explicitTotalQty;
+      }
+      return list;
+    }
+
+    function updateCurrencySymbols() {
+      document.querySelectorAll(".currency-symbol").forEach(el => el.textContent = state.currencySymbol);
+      document.getElementById("thresholdTwd").textContent = `約 ${formatTwd(state.freeShippingThreshold)}`;
+      document.getElementById("shippingFeeTwd").textContent = `約 ${formatTwd(state.shippingFee)}`;
+      renderItems();
+      if (state.lastResults) displayResults(state.lastResults);
+      
+      requestSave();
+    }
+
+    function renderGiftRules() {
+      const container = document.getElementById("giftRulesList");
+      container.innerHTML = "";
+      if (state.giftRules.length === 0) {
+        container.innerHTML = `<div class="text-xs text-gray-400 py-2 font-black px-1 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">目前無滿額贈品規則</div>`;
+        return;
+      }
+      state.giftRules.forEach(rule => {
+        const div = document.createElement("div");
+        div.className = "flex items-center gap-2 bg-white p-2.5 rounded-2xl border-2 border-ck-pinkLight shadow-sm";
+        div.innerHTML = `
+          <div class="flex items-center gap-1 shrink-0 pl-1 text-xs font-black text-ck-pinkDark">
+            滿${state.currencySymbol}
+            <input type="number" data-id="${rule.id}" min="0" step="any" value="${rule.threshold}" class="rule-threshold-input w-20 bg-gray-50 border-none rounded-xl px-2 py-1.5 text-xs font-black font-mono text-center text-ck-pinkDark focus:ring-2 focus:ring-ck-pinkLight outline-none">
+          </div>
+          <input type="text" data-id="${rule.id}" class="rule-name-input flex-1 bg-gray-50 border-none rounded-xl px-3 py-1.5 text-xs font-black text-ck-text focus:ring-2 focus:ring-ck-pinkLight outline-none" value="${rule.name}">
+          <label class="flex items-center gap-1 text-[11px] font-black text-gray-500 cursor-pointer shrink-0 hover:text-ck-pinkDark transition">
+            <input type="checkbox" data-id="${rule.id}" class="rule-cumul-check rounded text-ck-pinkDark focus:ring-ck-pinkLight border-gray-300 w-4 h-4" ${rule.isCumulative ? "checked" : ""}> 累贈
+          </label>
+          <button data-id="${rule.id}" class="btn-del-rule text-gray-300 hover:text-red-500 p-2 rounded-xl hover:bg-red-50 transition">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+      
+      container.querySelectorAll(".rule-threshold-input").forEach(inp => inp.addEventListener("change", e => {
+        const rule = state.giftRules.find(r => r.id === e.target.dataset.id);
+        if (rule) {
+          rule.threshold = parseFloat(e.target.value) || 0;
+          requestSave();
+          if (state.lastResults && state.items.length) displayResults(optimizeCarts());
+        }
+      }));
+      container.querySelectorAll(".rule-name-input").forEach(inp => inp.addEventListener("change", e => {
+        const rule = state.giftRules.find(r => r.id === e.target.dataset.id);
+        if (rule) { rule.name = e.target.value.trim(); requestSave(); }
+      }));
+      container.querySelectorAll(".rule-cumul-check").forEach(chk => chk.addEventListener("change", e => {
+        const rule = state.giftRules.find(r => r.id === e.target.dataset.id);
+        if (rule) { rule.isCumulative = e.target.checked; requestSave(); }
+      }));
+      container.querySelectorAll(".btn-del-rule").forEach(btn => btn.addEventListener("click", e => {
+        state.giftRules = state.giftRules.filter(r => r.id !== btn.dataset.id);
+        renderGiftRules();
+      }));
+
+      requestSave();
+    }
+
+    function renderItems() {
+      const container = document.getElementById("itemsContainer");
+      container.innerHTML = "";
+      let totalUnits = 0, totalAmount = 0;
+
+      state.items.forEach((item, index) => {
+        const subtotal = item.price * item.qty;
+        totalUnits += item.qty;
+        totalAmount += subtotal;
+
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between p-3.5 rounded-3xl bg-white border-2 border-gray-100 hover:border-ck-pinkLight transition-all shadow-sm hover:shadow-md group";
+        
+        const limitBadge = item.limit > 0
+          ? `<span class="bg-red-50 text-red-500 border-2 border-red-100 px-2 py-0.5 rounded-full font-black text-[10px] ml-1 shadow-inner">限購 ${item.limit}</span>`
+          : `<span class="bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full font-black text-[10px] ml-1">不限</span>`;
+
+        row.innerHTML = `
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="w-7 h-7 rounded-full bg-ck-bgYellow border-2 border-ck-yellowDark/30 flex items-center justify-center text-[11px] font-black text-ck-yellowDark shrink-0">${index + 1}</div>
+            <div class="truncate">
+              <div class="flex items-center text-sm">
+                <span class="font-black text-ck-text truncate max-w-[80px]">${escapeHtml(item.buyer)}</span>
+                <span class="text-gray-300 mx-2">|</span>
+                <span class="text-ck-blue font-black truncate">${escapeHtml(item.name)}</span>
+                ${limitBadge}
+              </div>
+              <div class="text-[11px] text-gray-400 mt-1 font-bold">
+                ${state.currencySymbol}${formatMoney(item.price)} × ${item.qty} = <span class="text-ck-pinkDark font-black font-mono text-xs ml-1">${state.currencySymbol}${formatMoney(subtotal)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-1 shrink-0 ml-2 opacity-80 group-hover:opacity-100 transition-opacity">
+            <button data-id="${item.id}" class="btn-edit-item w-9 h-9 rounded-full bg-gray-50 hover:bg-ck-blue hover:text-white text-gray-400 transition flex items-center justify-center shadow-sm">
+              <i class="fa-solid fa-pen-nib"></i>
+            </button>
+            <button data-id="${item.id}" class="btn-delete-item w-9 h-9 rounded-full bg-gray-50 hover:bg-red-400 hover:text-white text-gray-400 transition flex items-center justify-center shadow-sm">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      container.querySelectorAll(".btn-edit-item").forEach(btn => btn.addEventListener("click", () => openEditModal(btn.dataset.id)));
+      container.querySelectorAll(".btn-delete-item").forEach(btn => btn.addEventListener("click", () => {
+        state.items = state.items.filter(it => it.id !== btn.dataset.id);
+        renderItems();
+      }));
+
+      document.getElementById("itemsCount").textContent = state.items.length;
+      document.getElementById("totalUnits").textContent = totalUnits;
+      document.getElementById("totalItemsAmount").textContent = `${state.currencySymbol}${formatMoney(totalAmount)}`;
+      
+      requestSave();
+    }
+
+    // --- 神級貪婪預判演算法更新 (Smart Lookahead Algorithm) ---
+    function optimizeCarts() {
+      if (state.items.length === 0) return [];
+
+      // 1. 將所有商品打散為單件，並追蹤正規化名稱 (normName) 用於限購判斷
+      const units = [];
+      state.items.forEach(item => {
+        const parsed = parseBuyersInput(item.buyer, item.qty);
+        parsed.forEach(p => {
+          for (let i = 0; i < p.qty; i++) {
+            units.push({
+              id: item.id, buyer: p.buyer, name: item.name, normName: item.normName, price: item.price, limit: item.limit
+            });
+          }
+        });
+      });
+
+      // 將所有商品依單價從高到低排序 (核心：大體積先塞)
+      units.sort((a, b) => b.price - a.price);
+
+      // 2. 透過限購規則計算最少必須開幾車
+      const itemCountsByName = {};
+      const limitByName = {};
+      units.forEach(u => {
+        itemCountsByName[u.normName] = (itemCountsByName[u.normName] || 0) + 1;
+        if (u.limit > 0) {
+          if (!limitByName[u.normName]) limitByName[u.normName] = u.limit;
+          else limitByName[u.normName] = Math.min(limitByName[u.normName], u.limit);
+        }
+      });
+
+      let minCartsRequired = 1;
+      Object.keys(limitByName).forEach(nameKey => {
+        const lim = limitByName[nameKey];
+        const count = itemCountsByName[nameKey];
+        if (lim > 0 && count > 0) {
+          minCartsRequired = Math.max(minCartsRequired, Math.ceil(count / lim));
+        }
+      });
+
+      // 3. 初始化車輛與輔助函式
+      const carts = Array.from({ length: minCartsRequired }, (_, i) => ({ id: i + 1, items: [], counts: {} }));
+      const cartAmount = cart => cart.items.reduce((s, it) => s + it.price, 0);
+      const canAddToCart = (cart, unit) => !limitByName[unit.normName] || (cart.counts[unit.normName] || 0) < limitByName[unit.normName];
+      const addToCart = (cart, unit) => { cart.items.push(unit); cart.counts[unit.normName] = (cart.counts[unit.normName] || 0) + 1; };
+
+      // 4. 開始智慧裝箱 (Smart Packing)
+      let unallocated = [...units];
+
+      while (unallocated.length > 0) {
+        const u = unallocated.shift();
+        
+        // 找出目前所有沒違反限購的車
+        let candidates = carts.filter(c => canAddToCart(c, u));
+        
+        // 如果現有車輛都被限購卡死，強制開新車
+        if (candidates.length === 0) {
+          const newCart = { id: carts.length + 1, items: [], counts: {} };
+          carts.push(newCart); 
+          candidates = [newCart];
+        }
+
+        // --- 預判計分系統 (Score System) ---
+        const getScore = (cart) => {
+           const currentTotal = cartAmount(cart);
+           const newTotal = currentTotal + u.price;
+           const threshold = state.freeShippingThreshold;
+           
+           if (state.strategy === "freeShipping" && threshold > 0) {
+              if (currentTotal < threshold && newTotal >= threshold) {
+                 // 【神之一手】加入這件剛好跨過免運門檻！最高分 (減去 newTotal 以偏好剛好過檻、不溢出太多的組合)
+                 return 10000000 - newTotal; 
+              }
+              if (currentTotal >= threshold) {
+                 // 【搭順風車】這車已經免運了，把免運無望的商品丟進來省運費
+                 return 2000000 - currentTotal; 
+              }
+              
+              // 【預判未來】這車目前還沒免運，先算算看「剩下的商品全塞進來」有沒有希望免運？
+              const possibleFutureValue = unallocated.filter(item => canAddToCart(cart, item)).reduce((s, item) => s + item.price, 0);
+              
+              if (newTotal + possibleFutureValue >= threshold) {
+                 // 有希望免運！高度優先集中火力！ (越接近門檻分數越高)
+                 return 5000000 + currentTotal; 
+              } else {
+                 // 沒救了，剩下的東西加起來也湊不到免運。給最低分，除非別無選擇不然別塞這裡。
+                 return currentTotal; 
+              }
+           } else {
+              // 策略：滿額贈最大化 (優先集中火力越過下一個贈品門檻)
+              let maxGiftRule = state.giftRules.length > 0 ? state.giftRules.reduce((prev, current) => (prev.threshold > current.threshold) ? prev : current) : null;
+              if (maxGiftRule) {
+                  const th = maxGiftRule.threshold;
+                  // 如果加入後跨越了新的一個滿額門檻級距
+                  if (Math.floor(newTotal / th) > Math.floor(currentTotal / th)) {
+                      return 10000000 - newTotal; 
+                  }
+                  // 否則集中火力
+                  return 5000000 + currentTotal; 
+              }
+              return currentTotal; 
+           }
+        };
+
+        // 依據分數高低對候選車輛進行排序 (分數最高的排前面)
+        candidates.sort((a, b) => getScore(b) - getScore(a)); 
+        
+        // 將商品塞入最優質的車輛
+        addToCart(candidates[0], u);
+      }
+
+      const activeCarts = carts.filter(c => c.items.length > 0);
+
+      // 5. 結算每車的運費與滿額禮狀態
+      activeCarts.forEach((cart, idx) => {
+        cart.id = idx + 1;
+        cart.totalAmount = cartAmount(cart);
+        cart.isFreeShipping = state.freeShippingThreshold > 0 ? cart.totalAmount >= state.freeShippingThreshold : true;
+        cart.shortageForFree = cart.isFreeShipping ? 0 : (state.freeShippingThreshold - cart.totalAmount);
+        cart.shippingFee = cart.isFreeShipping ? 0 : state.shippingFee;
+
+        // 將同人、同品項的商品折疊顯示
+        const displayMap = new Map();
+        cart.items.forEach(u => {
+          const lim = limitByName[u.normName] || 0;
+          const key = `${u.buyer}__${u.normName}__${u.price}__${lim}`;
+          if (!displayMap.has(key)) displayMap.set(key, { buyer: u.buyer, name: u.name, price: u.price, limit: lim, qty: 0 });
+          displayMap.get(key).qty += 1;
+        });
+        cart.groupedItems = Array.from(displayMap.values());
+
+        // 計算滿額禮
+        cart.gifts = [];
+        cart.nextGiftOpportunity = null;
+        state.giftRules.forEach(rule => {
+          if (rule.threshold <= 0) return;
+          if (rule.isCumulative) {
+            const count = Math.floor(cart.totalAmount / rule.threshold);
+            if (count > 0) cart.gifts.push({ name: rule.name, count });
+            const nextNeeded = (count + 1) * rule.threshold - cart.totalAmount;
+            if (!cart.nextGiftOpportunity || nextNeeded < cart.nextGiftOpportunity.shortage) {
+              cart.nextGiftOpportunity = { name: rule.name, shortage: nextNeeded };
+            }
+          } else {
+            if (cart.totalAmount >= rule.threshold) {
+              cart.gifts.push({ name: rule.name, count: 1 });
+            } else {
+              const diff = rule.threshold - cart.totalAmount;
+              if (!cart.nextGiftOpportunity || diff < cart.nextGiftOpportunity.shortage) {
+                cart.nextGiftOpportunity = { name: rule.name, shortage: diff };
+              }
+            }
+          }
+        });
+      });
+
+      return activeCarts;
+    }
+
+    /* Rendering Results */
+    function displayResults(carts) {
+      state.lastResults = carts;
+      const container = document.getElementById("cartsContainer");
+      container.innerHTML = "";
+
+      if (carts.length === 0) {
+        document.getElementById("buyersSection").classList.add("hidden");
+        return;
+      }
+
+      const totalShipping = carts.reduce((sum, c) => sum + c.shippingFee, 0);
+      document.getElementById("metricTotalCarts").textContent = carts.length;
+      document.getElementById("metricFreeShippingCarts").textContent = carts.filter(c => c.isFreeShipping).length;
+      document.getElementById("metricTotalGifts").textContent = carts.reduce((sum, c) => sum + c.gifts.reduce((gs, g) => gs + g.count, 0), 0);
+      document.getElementById("metricTotalShipping").textContent = `${state.currencySymbol}${formatMoney(totalShipping)}`;
+
+      carts.forEach(cart => {
+        const div = document.createElement("div");
+        div.className = "ck-card overflow-hidden transition-all duration-300 hover:shadow-[0_15px_40px_rgba(255,181,204,0.25)] border-4 border-transparent hover:border-ck-pinkLight";
+
+        const freeBadge = cart.isFreeShipping
+          ? `<span class="px-4 py-2 rounded-full bg-green-100 text-green-600 text-[11px] font-black flex items-center gap-1.5 shadow-sm border-2 border-green-200"><i class="fa-solid fa-check-circle text-sm"></i> 免運達成 🎉</span>`
+          : `<span class="px-4 py-2 rounded-full bg-ck-bgYellow text-ck-text text-[11px] font-black flex items-center gap-1.5 shadow-sm border-2 border-ck-yellowDark/50"><i class="fa-solid fa-truck"></i> 運費 ${state.currencySymbol}${formatMoney(cart.shippingFee)}</span>`;
+
+        let giftsHtml = "";
+        if (cart.gifts.length > 0) {
+          giftsHtml = `
+            <div class="mt-5 pt-4 border-t-2 border-dashed border-ck-pinkLight flex flex-wrap items-center gap-2 bg-ck-pinkLight/30 -mx-6 -mb-6 p-6 rounded-b-3xl">
+              <span class="text-sm font-black text-ck-pinkDark flex items-center gap-1.5"><i class="fa-solid fa-gift text-lg"></i> 本車獲得贈品：</span>
+              ${cart.gifts.map(g => `<span class="px-3 py-1.5 rounded-full bg-ck-pinkDark text-white text-[11px] font-black shadow-md border-b-2 border-pink-600">${g.name} <span class="bg-white/20 px-1.5 rounded ml-1">x${g.count}</span></span>`).join("")}
+            </div>`;
+        }
+
+        let adviceHtml = "";
+        const advices = [];
+        if (!cart.isFreeShipping && cart.shortageForFree > 0) advices.push(`差 ${state.currencySymbol}${formatMoney(cart.shortageForFree)} (約 ${formatTwd(cart.shortageForFree)}) 達免運`);
+        if (cart.nextGiftOpportunity && cart.nextGiftOpportunity.shortage > 0) advices.push(`湊 ${state.currencySymbol}${formatMoney(cart.nextGiftOpportunity.shortage)} 多拿【${cart.nextGiftOpportunity.name}】`);
+        
+        if (advices.length > 0) {
+          adviceHtml = `
+            <div class="bg-ck-bgYellow px-6 py-3 text-xs font-black text-ck-text border-t-2 border-ck-yellowDark/30 flex flex-wrap gap-x-5 gap-y-2 rounded-b-3xl">
+              ${advices.map(ad => `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-ck-yellowDark text-white flex items-center justify-center"><i class="fa-regular fa-lightbulb text-[10px]"></i></div><span>${ad}</span></div>`).join("")}
+            </div>`;
+        }
+
+        const itemsRows = cart.groupedItems.map(item => {
+          const itemTotal = item.price * item.qty;
+          return `
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <td class="py-3 px-3 font-black text-ck-text text-sm">${escapeHtml(item.buyer)}</td>
+              <td class="py-3 px-3 text-ck-blue font-black text-sm flex flex-wrap items-center gap-2">
+                ${escapeHtml(item.name)} 
+                ${item.limit > 0 ? `<span class="ck-badge">限${item.limit}</span>` : ""}
+              </td>
+              <td class="py-3 px-3 text-center font-black text-gray-600 bg-gray-50/50">${item.qty}</td>
+              <td class="py-3 px-3 text-right font-black text-ck-pinkDark font-mono text-sm">
+                ${state.currencySymbol}${formatMoney(itemTotal)}
+                <div class="text-[10px] text-gray-400 font-bold mt-0.5 font-sans">約 ${formatTwd(itemTotal)}</div>
+              </td>
+            </tr>`;
+        }).join("");
+
+        div.innerHTML = `
+          <div class="p-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b-2 border-ck-pinkLight pb-4 mb-4">
+              <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full bg-ck-pinkDark text-white font-black flex items-center justify-center text-xl shadow-[0_4px_10px_rgba(244,142,170,0.5)] border-4 border-[#FFEBF1]">
+                  #${cart.id}
+                </div>
+                <div>
+                  <h3 class="font-black text-ck-text text-lg tracking-wide">第 ${cart.id} 車 <span class="text-xs text-gray-400 font-bold ml-1 bg-gray-100 px-2 py-0.5 rounded-full">共 ${cart.items.length} 件</span></h3>
+                  <div class="text-sm text-gray-500 font-bold mt-1 bg-ck-pinkLight/50 px-3 py-1 rounded-full inline-block">
+                    本單金額: <span class="font-black text-ck-pinkDark text-lg ml-1">${state.currencySymbol}${formatMoney(cart.totalAmount)}</span>
+                    <span class="text-[10px] text-gray-400 font-black"> (約 ${formatTwd(cart.totalAmount)})</span>
+                  </div>
+                </div>
+              </div>
+              <div>${freeBadge}</div>
+            </div>
+            
+            <div class="overflow-hidden rounded-2xl border-2 border-gray-100 bg-white shadow-sm">
+              <table class="w-full text-left">
+                <thead class="bg-gray-50/80">
+                  <tr class="text-[11px] font-black text-gray-400 border-b-2 border-gray-100">
+                    <th class="py-3 px-3">購買人</th>
+                    <th class="py-3 px-3">商品</th>
+                    <th class="py-3 px-3 text-center">數量</th>
+                    <th class="py-3 px-3 text-right">小計</th>
+                  </tr>
+                </thead>
+                <tbody>${itemsRows}</tbody>
+              </table>
+            </div>
+            ${giftsHtml}
+          </div>
+          ${cart.gifts.length === 0 ? adviceHtml : ""}
+        `;
+        container.appendChild(div);
+      });
+
+      renderBuyersBreakdown(carts);
+    }
+
+    function renderBuyersBreakdown(carts) {
+      const section = document.getElementById("buyersSection");
+      const container = document.getElementById("buyersTable");
+      container.innerHTML = "";
+      section.classList.remove("hidden");
+
+      const buyersMap = {};
+      carts.forEach(cart => {
+        const freightPerUnit = cart.items.length > 0 ? (cart.shippingFee / cart.items.length) : 0;
+        cart.items.forEach(u => {
+          if (!buyersMap[u.buyer]) buyersMap[u.buyer] = { name: u.buyer, count: 0, amount: 0, shipping: 0 };
+          buyersMap[u.buyer].count += 1;
+          buyersMap[u.buyer].amount += u.price;
+          buyersMap[u.buyer].shipping += freightPerUnit;
+        });
+      });
+
+      Object.values(buyersMap).forEach(b => {
+        const total = b.amount + b.shipping;
+        const div = document.createElement("div");
+        div.className = "p-5 rounded-3xl border-2 border-gray-100 bg-white flex flex-wrap items-center justify-between gap-3 shadow-sm hover:border-ck-yellowDark/50 transition hover:shadow-md";
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="font-black text-ck-text text-base">${escapeHtml(b.name)}</span>
+              <span class="px-2 py-0.5 rounded-full bg-ck-bgYellow border-2 border-ck-yellowDark/30 text-ck-yellowDark font-black text-[10px]">共 ${b.count} 件</span>
+            </div>
+            <div class="text-gray-400 text-xs font-bold bg-gray-50 px-2 py-1 rounded-lg inline-block">
+              商品 ${state.currencySymbol}${formatMoney(b.amount)}
+              ${b.shipping > 0 ? `<span class="text-gray-300 mx-1">|</span>運費 ${state.currencySymbol}${formatMoney(b.shipping)}` : ``}
+            </div>
+          </div>
+          <div class="text-right bg-ck-pinkLight/30 p-2 rounded-2xl">
+            <div class="text-xl font-black text-ck-pinkDark font-mono">${state.currencySymbol}${formatMoney(total)}</div>
+            <div class="text-[11px] text-gray-400 font-bold text-center mt-0.5">約 ${formatTwd(total)}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function generateReportText() {
+      if (!state.lastResults || state.lastResults.length === 0) return "";
+      let text = `🌸【Chiikawa 智慧分單通知】🌸\n`;
+      text += `幣別：${state.currency} (匯率：${state.exchangeRate})\n`;
+      text += `----------------------\n`;
+
+      state.lastResults.forEach(cart => {
+        text += `\n🛒【第 ${cart.id} 車】總計：${state.currencySymbol}${formatMoney(cart.totalAmount)} (約 ${formatTwd(cart.totalAmount)})\n`;
+        text += `狀態：${cart.isFreeShipping ? "✅ 免運達成" : `⚠️ 需運費 ${state.currencySymbol}${formatMoney(cart.shippingFee)}`}\n`;
+        cart.groupedItems.forEach(it => text += ` • ${it.buyer}：${it.name} x${it.qty}\n`);
+        if (cart.gifts.length > 0) text += ` 🎁 贈品：${cart.gifts.map(g => `${g.name} x${g.count}`).join("、")}\n`;
+        if (!cart.isFreeShipping && cart.shortageForFree > 0) text += ` 💡 差 ${state.currencySymbol}${formatMoney(cart.shortageForFree)} 免運\n`;
+      });
+
+      text += `\n======================\n💰【各團員結算 (含運費平攤)】\n`;
+      const buyersMap = {};
+      state.lastResults.forEach(cart => {
+        const freight = cart.items.length > 0 ? (cart.shippingFee / cart.items.length) : 0;
+        cart.items.forEach(u => {
+          if (!buyersMap[u.buyer]) buyersMap[u.buyer] = { name: u.buyer, total: 0 };
+          buyersMap[u.buyer].total += (u.price + freight);
+        });
+      });
+      Object.values(buyersMap).forEach(b => text += `• ${b.name}：${state.currencySymbol}${formatMoney(b.total)} (約 ${formatTwd(b.total)})\n`);
+      return text;
+    }
+
+    function openEditModal(id) {
+      const item = state.items.find(it => it.id === id);
+      if (!item) return;
+      document.getElementById("editItemId").value = item.id;
+      document.getElementById("editBuyer").value = item.buyer;
+      document.getElementById("editItemName").value = item.name;
+      document.getElementById("editPrice").value = item.price;
+      document.getElementById("editQty").value = item.qty;
+      document.getElementById("editLimit").value = item.limit;
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("currencySelect").addEventListener("change", e => {
+        const opt = e.target.options[e.target.selectedIndex];
+        state.currency = e.target.value; state.currencySymbol = opt.dataset.symbol;
+        state.exchangeRate = parseFloat(opt.dataset.rate); document.getElementById("exchangeRate").value = state.exchangeRate;
+        updateCurrencySymbols();
+      });
+      document.getElementById("exchangeRate").addEventListener("input", e => { state.exchangeRate = parseFloat(e.target.value) || 0; updateCurrencySymbols(); });
+      document.getElementById("freeShippingThreshold").addEventListener("input", e => { state.freeShippingThreshold = parseFloat(e.target.value) || 0; updateCurrencySymbols(); });
+      document.getElementById("shippingFee").addEventListener("input", e => { state.shippingFee = parseFloat(e.target.value) || 0; updateCurrencySymbols(); });
+      document.querySelectorAll("input[name='splitStrategy']").forEach(r => r.addEventListener("change", e => { state.strategy = e.target.value; requestSave(); if(state.items.length) displayResults(optimizeCarts()); }));
+
+      const updatePreview = () => {
+        const qty = parseInt(document.getElementById("inputQty").value) || parseBuyersInput(document.getElementById("inputBuyer").value).reduce((s, p) => s + p.qty, 0) || 1;
+        document.getElementById("previewSubtotal").textContent = `${state.currencySymbol}${formatMoney((parseFloat(document.getElementById("inputPrice").value) || 0) * qty)}`;
+      };
+      ["inputBuyer", "inputPrice", "inputQty"].forEach(id => document.getElementById(id).addEventListener("input", updatePreview));
+
+      document.getElementById("itemForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const buyer = document.getElementById("inputBuyer").value.trim();
+        const name = document.getElementById("inputItemName").value.trim();
+        if (!buyer || !name) return;
+        
+        let qty = parseInt(document.getElementById("inputQty").value);
+        if (!qty) qty = parseBuyersInput(buyer).reduce((s, p) => s + p.qty, 0) || 1;
+
+        state.items.push({
+          id: "it_" + Date.now(), buyer, name, normName: name.replace(/\s+/g, ''),
+          price: parseFloat(document.getElementById("inputPrice").value) || 0, qty,
+          limit: parseInt(document.getElementById("inputLimit").value) || 0
+        });
+        
+        renderItems();
+        document.getElementById("inputBuyer").value = ""; document.getElementById("inputQty").value = "";
+        document.getElementById("inputBuyer").focus(); updatePreview();
+        showToast(`已成功登記「${name}」！`, "success");
+      });
+
+      const confirmClearModal = document.getElementById("confirmClearModal");
+      document.getElementById("btnClearAllItems").addEventListener("click", () => {
+        if (state.items.length === 0) return showToast("清單已經是空的囉！", "info");
+        confirmClearModal.classList.remove("hidden");
+      });
+      document.getElementById("btnCancelClear").addEventListener("click", () => confirmClearModal.classList.add("hidden"));
+      document.getElementById("btnConfirmClear").addEventListener("click", () => {
+        state.items = []; 
+        renderItems(); 
+        displayResults([]); 
+        confirmClearModal.classList.add("hidden");
+        showToast("購物車已清空！", "warning"); 
+      });
+
+      document.getElementById("btnOptimize").addEventListener("click", () => {
+        if (state.items.length === 0) return showToast("請先登記商品喔！", "warning");
+        displayResults(optimizeCarts()); showToast("智慧預判拆單完成！✨", "success");
+      });
+      document.getElementById("btnCopyReport").addEventListener("click", () => {
+        if (!state.lastResults) return showToast("請先點擊試算！", "warning");
+        const success = fallbackCopyTextToClipboard(generateReportText());
+        if (success) showToast("已成功複製報表！📝", "success");
+        else showToast("複製失敗，請手動框選文字複製", "warning");
+      });
+      
+      document.getElementById("btnAddGiftRule").addEventListener("click", () => {
+        state.giftRules.push({ id: "r_" + Date.now(), threshold: state.currency === "JPY" ? 5000 : 30, name: "滿額特典", isCumulative: false });
+        renderGiftRules();
+      });
+
+      const batchModal = document.getElementById("batchModal");
+      document.getElementById("btnOpenBatchModal").addEventListener("click", () => batchModal.classList.remove("hidden"));
+      const closeBatch = () => batchModal.classList.add("hidden");
+      document.getElementById("btnCloseBatchModal").addEventListener("click", closeBatch);
+      document.getElementById("btnCancelBatch").addEventListener("click", closeBatch);
+      document.getElementById("btnConfirmBatch").addEventListener("click", () => {
+        const text = document.getElementById("batchInputText").value.trim();
+        if (!text) return closeBatch();
+        let count = 0;
+        text.split("\n").forEach(line => {
+          const p = line.trim().split(/\s+/);
+          if (p.length >= 3) {
+            state.items.push({
+              id: "it_" + Date.now() + Math.random(), buyer: p[0], name: p[1], normName: p[1].replace(/\s+/g, ''),
+              price: parseFloat(p[2]) || 0, qty: parseInt(p[3]) || 1, limit: parseInt(p[4]) || 0
+            });
+            count++;
+          }
+        });
+        renderItems(); document.getElementById("batchInputText").value = ""; closeBatch();
+        showToast(`成功匯入 ${count} 筆商品！`, "success");
+      });
+
+      const editModal = document.getElementById("editModal");
+      const closeEdit = () => editModal.classList.add("hidden");
+      document.getElementById("btnCloseEditModal").addEventListener("click", closeEdit);
+      document.getElementById("btnCancelEdit").addEventListener("click", closeEdit);
+      document.getElementById("editItemForm").addEventListener("submit", e => {
+        e.preventDefault();
+        const target = state.items.find(it => it.id === document.getElementById("editItemId").value);
+        if (target) {
+          target.buyer = document.getElementById("editBuyer").value.trim();
+          target.price = parseFloat(document.getElementById("editPrice").value) || 0;
+          target.qty = parseInt(document.getElementById("editQty").value) || 1;
+          target.limit = parseInt(document.getElementById("editLimit").value) || 0;
+          renderItems(); closeEdit(); showToast("修改成功！", "success");
+          if (state.lastResults) displayResults(optimizeCarts());
+        }
+      });
+
+      async function initApp() {
+        if (auth) {
+          try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+              await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+              await signInAnonymously(auth);
+            }
+            userId = auth.currentUser?.uid;
+            
+            if (userId && db) {
+              const docRef = doc(db, 'artifacts', appId, 'users', userId, 'saves', 'latest');
+              const snap = await getDoc(docRef);
+              if (snap.exists()) {
+                const data = snap.data();
+                Object.assign(state, data);
+                
+                document.getElementById("currencySelect").value = state.currency;
+                document.getElementById("exchangeRate").value = state.exchangeRate;
+                document.getElementById("freeShippingThreshold").value = state.freeShippingThreshold;
+                document.getElementById("shippingFee").value = state.shippingFee;
+                const stratRadio = document.querySelector(`input[name='splitStrategy'][value='${state.strategy}']`);
+                if (stratRadio) stratRadio.checked = true;
+
+                updateCurrencySymbols(); 
+                renderGiftRules(); 
+                displayResults(optimizeCarts());
+                
+                showToast("雲端精靈已為您恢復上次的輸入進度！☁️✨", "success");
+                return; 
+              }
+            }
+          } catch(e) { console.warn("Load progress error", e); }
+        }
+        
+        updateCurrencySymbols(); renderGiftRules(); renderItems();
+      }
+
+      initApp();
+    });
+  </script>
+</body>
+</html>
